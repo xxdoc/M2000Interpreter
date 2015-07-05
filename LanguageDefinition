@@ -1,0 +1,285 @@
+Language definition (Version 8)
+Remarks
+In modules and functions we can use \ and ' for remarks. \# is the pre-processor (see later)
+\
+Variable types
+Basic types: IamAdouble123, IamAint123%, IamAString123$
+All names have one letter and after that letters or numbers (we can use dot and underscore)
+A double is same as double in Vb6. An int is a double without decimals. A string is same as Vb6 String
+Dots before first letter have a special meaning, as we will see.
+We can convert a double to a Long (as Long in Vb6)
+Long A=10 : A=10.3 : Print A
+We get 10 because A is a Long
+Print type$(A) \\ so we can get
+Long (4 byte integer, like a double in name format), Document as string or array element, with paragraphs, Group (like a double in name format)
+We can make global variables by using global. Global variables assigned values using "<=" and not "=" 
+We use &name to pass by reference (also we read by a name using & to make the reference)
+
+Array types
+Basic types plus the use of a double array as group container. We can use Stock statement to mix types in an array, so we can have records of mixed type.
+All arrays can be change in dimensions and or size without lost values. We can define arrays with no dimension, for later change.
+We can declare arrays giving an initializing value (can be function, class function) 
+We can declare global arrays too (see about what this means in module definition). Global array items use "=" 
+(Dim command make (and redim) local arrays, Global command make (and redim) global arrays)
+We can assign multiple items A(10)=1,4,5 put 1 to A(10)...5 to A(12)
+For strings arrays there is ":=" to assign mix values (see example 1)
+We use &name to pass by reference (also we read by a name using & to make the reference)
+Example 1
+Dim A$(20), B(3,3,3)=1
+A$(0):="George", 2, 100
+\\ Push &A$() : Read &A(): Print A(1)+A(2)
+Link A$() to A() : Print A(1)+A(2) 
+We can't pass a new reference to an already defined variables or arrays in a module or function.
+
+Group
+A group of variables, arrays, modules, functions and other groups can have a common name, and that consist a group. A group is not a closed set. 
+Group Alfa { X,Y=10, A$="alfa" }
+If we place a LIST command we see
+ALFA [Group], ALFA.X=0, ALFA.Y=10,ALFA.A$="alfa"
+So any item is separated. So what Alfa[Group] do? The group has a list of what is common, including modules and functions.
+So a statement Beta=Alfa produce a new group with BETA.X=0, BETA.Y=10, BETA.A$="alfa"
+We can pass by reference or by value all the group of items through modules or and functions. Also we can can leave copies in array elements
+Dim A(20)
+A(2)=ALFA : Print A(2).A$ \\ print alfa
+Groups in array elements are hidden from variable list.
+A(3)=ALFA \\ a new copy
+For A(2), A(3) { 
+.X+=10 : .Y++
+Print .X+..X .Y+..Y, .A$+..A$ \\ we use double dot for second item in a for structure 
+}
+We say ground groups the alfa and beta group. We say float groups the hidden groups in array elements or in stack
+Push Alfa \\we make a copy as a float group in top of stack
+Read Kappa \\ we make a ground group from stack
+We can place a group by reference,
+Push &Alfa
+Read &Kappa1 \\ we can't assign a reference in an exist name – we must provide a new (or in a module or function we can have the same because we insert in a new level, where Alfa didn't exist.
+Kappa1.X=100 : Print Alfa.X \\ print 100 because these two variables share the same space in memory.
+
+A command
+A command, is the smallest piece of code that we can say it is a code to do something. A command can take parameters (separated by comma) or not (a bare command).
+Example for printing in screen a number: Print 10
+A line of code
+There is two kind of lines of code. One is the level zero code, or the CLI level code. Another one is the module/function level code, or the multiline code. In level zero code we defines global items. We can go from level zero to any module or function by calling modules or using functions in expressions. We can go from any module or function to level zero code by sending one line of code using SET command.
+A line of code can have multiple commands separate them by colon. 
+In level zero code we can't use control structures,
+For non level zero code: We can use line numbers (5 digits only) and labels with a colon as last char
+Example of line of code (like Basic): Input A : Print A
+
+The Stack
+Commands can utilize the stack of values. Stack is list of values with one of them as a top. Every time we push a value that value take the top position as the top item. Every time we read a value that value taken from the top position and the next one (if any) be a new top item.
+A stack item can be any value for variables, copies of arrays and groups, references for functions, arrays, variables, groups. (references in M2000 are strings)
+We can fill the stack from the top using PUSH or from the bottom using DATA
+We can read the top item, or a series of items from top with READ command (also read depend of what it finds in stack can define new variables, arrays, groups or make references to variables, arrays, groups and functions)
+We can shift items to top using SHIFT numberfrom
+We can make a copy of an item as a new top item using OVER numberofitem (Over without number double the top of stack).
+Example 1. We can make two copies B() and C() from array A(): Push A() : Over : Read B(), C() 
+Example 2. We make a reference to a variable A as a new variable B: Push &A : Read &B
+Example 3.
+If we have a GroupA.GroupB then a Push GroupA.GroupB pushes a copy of inner group GroupB of group GroupA
+A command Read GroupB make a new group as a copy of GroupB (we can use Over to duplicate this stack item too)
+Example 4.
+If we have a GroupA.GroupB then a Push &GroupA.GroupB pushes a reference of inner group GroupB of group GroupA
+A command Read &GroupB make a new group as GroupB but all variables and arrays are reference of the original and also any module/function from original group are copied as new modules/functions, with same name but in other group, with the same code as for original group.
+Example 5.
+If stack is empty then 
+DATA 10,20,30
+Read A, B, C
+Command READ assign values to variables (make new if not found) A =10, B=20, C=30
+Example 6 Using same name for string variables and numeric. Read from Stack.
+Push 1, "String" : Read A$, A : Print A$, A
+Example 7. Using Letter$ and Number to read top of stack
+Push 1, "String" : Print Letter$, Number
+We can use Empty, IsNum, IsLet, Match() to identify if stack is empty, if it is a number at the top, if is a letter (string), or we can provide a string with items we want to match with items in top of stack. 
+We can access the stack as an array **************************************************
+
+A block of code { }
+any code executed in a block of code, except the code we put manual in the command prompt in the environment.
+a block of code can be anywhere in the code except where we expect an expression.
+A block of code may have nested blocks. Sequence of blocks can exist in a block.
+a bare block { } is basically a no operation but may do something because interpreter automatic sending a request for screen refresh 
+Any block is a hidden control structure. If a LOOP command executed in the block then when executed the last command the block restart.
+We can exit from any point in a block with EXIT command.
+We can restart the block immediately with RESTART command
+We can continue to the end of block with CONTINUE (so if a LOOP command executed before this is a restart, or if not this is an exit).
+We can exit from more than one block using BREAK.
+We can jump to a line number or label if it is in the block
+We can use gosub to call routines using line number or labels in module/function space
+we can use gosub to call subroutines in module/function space.
+Any definition in the block is part of module/function with the next exception
+A for this { } structure is a specific structure where all new variables, arrays, modules and functions, erased at the end of the block
+Example of a block of code
+{ A=2 : B=10
+Print A*B }
+
+Pre-Processor
+We can use directives \# before any command to alter specific strings in the code. These directives erased after first run.
+It is Case  Sensitive tool
+1. replace one word or symbols to other word(s) or symbols(s) including spaces between. 
+\#Word1 Word2 Word3
+2. replace a set of words with other word(s)
+\#Word01 Word02: Word3
+3. Execute by condition – use global vars
+\#(boolean expression)Word01 Word2 Word3
+3.Execute or skip some lines
+\#(boolean expression, skiplinesnumber)Word01 Word2 Word3
+
+Module
+We can make named blocks using the Module command or by using Edit modulenamein manual mode
+Syntax: Module Alfa { this is a block of code }
+Modules defined in level zero are global
+We can declare global module in any module or function using Global tag
+Syntax Module global Beta {this is a block of code} 
+A module may define other modules and functions and other blocks of code. We can use blocks of code as separate threads (see Thread)
+From a module we can call other modules but not the module itself, except of using the CALL command (explain later)
+When execution ends (normal or with exit, or by Esc button, or by Break button) any new variable, array, module or function erased. Also erased any thread in the threading pool that was defined in this module level.
+Any Module utilize the stack of values. This is taken from calling module or if we call a module from manual mode then stack is the basic stack.
+So we can call any module passing any parameter in stack for values.
+A module can be design to accept the input or not, by using READ command. There are commands to examine the stack items before we pop them.
+At the end of execution (for any reason) stack may altered from the module. So using stack a module can return any number of items
+Example 1
+Module Alfa {
+Read A, B : Push A*B
+}
+Alfa 10,20
+Print Number
+we get 30
+We can inspect modules using Modules command. Modules is general for loaded an in disk modules, or we use Modules ? for loaded modules)
+We can make a new module using Edit ModuleName in manual mode. We can save all modules and functions in memory with Save command, and that is a program or a library. We can load modules from anywhere, in manual mode or in any module. Modules that are loaded in modules exist only until module ends. 
+
+Part Block
+part  { } as B
+if B is false then B is turn to true and the block executed. After the end of execution B turn to false
+If B is true then that means that another part is running, so interpreter skip that block.
+Thread  -  Main.Task
+A thread is a block of code with a handler (a number in a variable)
+X=10
+Thread {  X++
+if x>100 then thread this erase  \\ inside a thread we can use this
+} as Handler
+Thread Handler interval 100
+Thread Handler Hold
+Thread Handler Restart
+Main.Task 100 {
+\\ this is the main thread, so any thread can run
+if inkey$="" then exit    \\ on exit from Main.Task  threads of module erased.
+}
+Threads have own value's stack. Threads in same module share variables, arrays and modules and functions that are defined in that module. Threads are block of code that runs in time intervals. If a module ends then all threads in that module stopped and deleted (we can press Esc and we stopped them also). New variable in a thread is a new variable in module.
+We can use EVERY time {  }  but Every isn't thread so we loose right time slice for every thread.
+We can use Wait time  to give time to run a thread
+There is the AFTER time {  } an automatic thread to execute once after some milliseconds
+
+Function
+Functions are like modules with four exceptions. 
+1. A function return always a value and used mostly in expressions. A function has own stack.
+2. Own stack. When we call a function with parameters, these parameters placed in function own stack. This stack is generated every time we call the function
+3. A function can call itself by default. This is the recursion ability. There is a Recursion.limit command who stop recursion when a function reach the limit.
+4. A function may passed by reference
+Functions also can be global with global tag : Function global Name1 {block of code}
+
+Example 1.
+Function Cube {
+\\ this is a commend. We can use ** for power also
+Read X : X=Abs(X) : =X^3
+}
+Print Cube(2), Cube(Cube(2))
+Example 2. Added to example 1, we make a reference to Cube() function
+Push &Cube() : Read &Cube2() 
+Print Cube2(2), Cube2(Cube(2))
+Example 3. Unnamed function
+We place a block of code in a string and we push it in stack. References are strings in M2000 and always interpreter in a Read knows what to do
+Push "{Read X, Y:=X**5+Y}" : Read &YourFunction() : Print YourFunction(10,20)
+
+Dim AnArray(10,20) =10 : Push &AnArray() : Read &YourArray() : Print YourArray(3,5) \\ we pass by reference an array
+Dim YourArray(20,20) \\ we redim AnArray because YourArray is a reference of AnArray
+Dim AnArray(10,20) =10 : Push AnArray() : Read YourArray() : Print YourArray(3,5) \\ we pass a copy of an array.
+
+
+Class
+A class definition in M2000 is just a special function. We can define global classes also with global tag, see function and module.
+Lets take a look at example 1.
+Example1. A class command make a function only with some parts.
+Class Comb { X, Y }
+A=Comb() : Input A.X, A.Y :for A { Print .X, .Y}
+
+After execution of Class command a function Comb() created exactly this (supposed we make it without global tag)
+
+(a plus sign needed from interpreter to remember that this function is from a class, when an error occur, interpretation stop and we return to manual mode. From there using shift+F1 we edit the class in the module that we have the class definition, with the cursor in the specific position where the error occur)
+So we have this function:
+Function Comp {
+Group Comp +{
+X, Y
+}
+Try {Comp.Comp} : = Comp}
+}
+Line "Try {Comp.Comp} : = Comp}" has two parts. The first part I we have a try { } block. This means that any error erased and the execution continue. 
+In the block we have the group Comp and we call module Comp inside group. If exist then that module is the construction module.
+The second part has the return from function, the group itself.
+How this work for construction a group;
+Lets look the second example:
+Class Comp { X, Y 
+module Comp {
+if match("NN") then read .X, .Y
+}
+}
+Now a Comp(10,20) return a group with values in X and Y.
+A=Comp(10,20)
+? A.X, A.Y \\ we can use char "?" for Print
+When we call function Comp() we place in a new stack two values 10 and 20 (using DATA internal so the second value go to bottom stack item )
+Calling Comp.Comp module we call this module with common stack . Inside module we check if there are two numbers in top of stack and if this is true we read X and Y. See the dot before X and Y. Any module and function in a group can access group modules, functions, variables, arrays and other groups by using the dot.
+Assignment statements
+We can use "=" to assign value to a variable. If variable not exist then a new one defined. Not need to declare variables at a starting point, but an error occur if we use a no defined variable.at right hand in an assignment
+There is "<=" type of assignment for global variables. Arrays declared with Dim or Global statements so we use only "=" for any case.
+In code all variables are local except for those that we declare as global. If a global exist then a local with a same name hide the global.
+We can examine if a variable exist with Valid() function. 
+? valid(X) \\ if we didn't define a X in module then if a global X exist then we get -1 (true)
+In groups we declare variables using comma to separate them. We can't use colon. In a module we have to use colon. 
+Here we have a module inside a group.
+Group Alfa {X=10,Y=30
+Module beta { .X<=.Y*2 : .Y++ }
+}
+Variables and arrays in Group level are static, for the time the group exist, as "grounded" or as "floating" (in an array element or in stack)
+So modules and functions have no static variables, but groups have. 
+
+Subroutines
+There are two kind of subroutines. 
+1. The light one
+Gosub 1000
+1000 Print X : Return
+Gosub AlfaBeta
+AlfaBeta: \\ see the colon at the end of AlfaBeta
+Print X: Return
+The light one with a label or number for starting point and a return at the end. We use them as for a batch of commands that we use many times in code, for making the code smaller. 
+2. The harder one
+L=50: K=100 :Gosub Alfa(10,30)
+Print L, K \\ 50 and 101
+SUB AlfaBeta(X, Y)
+Local L=30
+K++
+Print X**2+Y
+END SUB
+Subs are light modules, using the same stack but they can call themselves (they have recursion). They open a local space so any new variables, arrays, modules, functions, are local. Also any module variable and array can be read unless we make local ones with LOCAL 
+If interpreter find SUB then this is interpreted like exit. So all Subs must be in the end of the module. Parameter list is typical. We can use Read Local inside Sub to read some other values and place it in local variables. But this is needed for those Subs we write for later use in other modules, and we copy therm, and maybe a new variable inside sub have same name with one from module.
+
+Local Variables
+We saw before the use of local variables in a Sub. In a group definition Local has another meaning.
+Local variables and artrays we can have in groups. Here a local keyword has a different meaning from the same keyword in a module or function. A local variable is a static variable in a group. If group is in ground mode (in a non floating form) then any local variable and array can be altered from own modules and functions but not from outside, if we have to deal with a reference to that group. In a float group...we can't save any change in the initial value. Every time we use the float group local variables get the initial values. See the two examples bellow.
+Group Alfa {
+local X=1
+local dim a$(3)="ok."
+function S { read K : .X++ : =K*.X }
+}
+For i=1 to 10 { print alfa.S(2) }
+Alfa.X=1 \\ we can see X in module level
+Module Alfa {read &myGroup : For myGroup {Print .S(5), .S(5), valid(.X) }} \\ 10 15 0 not valid
+Alfa &Alfa
+
+A float group when we read a local variable we read the first value (here X=1). When we process a float group in a for statement then for that space and time, local variable works but can't saved in group at the end of for statement.
+dim A(10)
+a(3)=Alfa
+For a(3) {
+.a$(0)="no"
+For i=1 to 10 { print .S(2), valid(.X), .a$(0) } \\ no valid .X
+}
+? a(3).X \\ .X now has the first value
+? a(3).a$(0) \\ also array a$(0) has first value "ok."
+
