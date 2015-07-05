@@ -150,6 +150,7 @@ Part Block
 part  { } as B
 if B is false then B is turn to true and the block executed. After the end of execution B turn to false
 If B is true then that means that another part is running, so interpreter skip that block.
+
 Thread  -  Main.Task
 A thread is a block of code with a handler (a number in a variable)
 X=10
